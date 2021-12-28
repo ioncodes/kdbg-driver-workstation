@@ -26,9 +26,9 @@ You are now ready to prepare Windows. Note that VMware may boot into a black scr
 1. Install Windows as you normally would. It is recommended to license the VM
 2. Install the VMware guest tools
 3. Install all pending updates
-4. Disable automatic startup repair:
+4. Force Windows to ignore all startup and shutdown failures:
 ```batch
-bcdedit /set {default} recoveryenabled no
+bcdedit /set {current} bootstatuspolicy ignoreallfailures
 ```
 5. Disable integrity checks and enable test signing
 ```batch
@@ -56,8 +56,8 @@ schtasks /create /sc onstart /tr "C:\onboot.bat" /tn driveronboot /ru SYSTEM /f
 ```
 11. Create the file `C:\onboot.bat` with the following content. Again, make sure to replace `$HOSTIP` and `$HOSTPORT`:
 ```batch
-sc start layle
 bcdedit /dbgsettings net hostip:$HOSTIP port:$HOSTPORT key:1.1.1.1
+sc start layle
 ```
 
 Finally, shutdown your VM. It is now ready to be used for kernel and driver debugging.
