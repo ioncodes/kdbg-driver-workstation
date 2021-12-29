@@ -64,16 +64,24 @@ sc start layle
 Finally, shutdown your VM. It is now ready to be used for kernel and driver debugging.
 
 ### Automating usermode applications (optional)
-Chances are that you would like to execute commands and executable in usermode in an automated fashion. To do this you will have to enable WinRM. However, to do this you'll need a "normal" ethernet adapter. You may have noticed that Windows reassigned your NAT adapter to a kernel debugging bridge. In your VMs settings, simply add a new NAT network adapter. Boot the VM and set the ethernet adapter to "Private". Now execute the following commands:
-```batch
-winrm quickconfig -q
-winrm set winrm/config/winrs @{MaxMemoryPerShellMB="512"}
-winrm set winrm/config @{MaxTimeoutms="1800000"}
-winrm set winrm/config/service @{AllowUnencrypted="true"}
-winrm set winrm/config/service/auth @{Basic="true"}
-sc config WinRM start= auto
+Chances are that you would like to execute commands and executable in usermode in an automated fashion. To do this you will have to install OpenSSH. However, to do this you'll need a "normal" ethernet adapter. You may have noticed that Windows reassigned your NAT adapter to a kernel debugging bridge. In your VMs settings, simply add a new NAT network adapter. Boot the VM and set the ethernet adapter to "Private". Now execute the following commands:
+```powershell
+Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
+Set-Service -Name sshd -StartupType "Automatic"
+New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
 ```
-Now you are able to execute commands to the VM over WinRM.
+
+If you set an empty password for the user you'll need to set the following registry key:
+```
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa > LimitBlankPasswordUse = 0
+```
+
+Additionally, you have to set the following line in `C:\ProgramData\ssh\sshd_config`:
+```
+PermitEmptyPasswords yes
+```
+
+Once rebooted, you are able to execute commands to the VM over SSH.
 
 ## One last change
 VMware can cause issues while kernel debugging. It tends to timeout the debugger's connection after a while of inactivity. To remediate this do the following (this setting persists across all VMs):
