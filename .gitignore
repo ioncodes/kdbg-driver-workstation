@@ -1,1 +1,2 @@
-*.sys
+guest/*
+!guest/.gitkeep

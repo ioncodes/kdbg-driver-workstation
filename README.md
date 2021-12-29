@@ -44,7 +44,7 @@ HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System > E
 bcdedit /debug on
 bcdedit /dbgsettings net hostip:$HOSTIP port:$HOSTPORT key:1.1.1.1
 ```
-8. Allow the VM to redirect debug message (for example `DbgPrint`) to WinDbg. Create the key "Debug Print Filter" if it doesn't exist:
+8. _Optional_: Allow the VM to redirect debug message (for example `DbgPrint`) to WinDbg. Create the key "Debug Print Filter" if it doesn't exist:
 ```
 HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Debug Print Filter > DEFAULT = 0xFFFFFFFF
 ```
@@ -59,8 +59,21 @@ schtasks /create /sc onstart /tr "C:\onboot.bat" /tn driveronboot /ru SYSTEM /f
 bcdedit /dbgsettings net hostip:$HOSTIP port:$HOSTPORT key:1.1.1.1
 sc start layle
 ```
+12. Remove the user's password to avoid having to enter it every time you boot the VM
 
 Finally, shutdown your VM. It is now ready to be used for kernel and driver debugging.
+
+### Automating usermode applications (optional)
+Chances are that you would like to execute commands and executable in usermode in an automated fashion. To do this you will have to enable WinRM. However, to do this you'll need a "normal" ethernet adapter. You may have noticed that Windows reassigned your NAT adapter to a kernel debugging bridge. In your VMs settings, simply add a new NAT network adapter. Boot the VM and set the ethernet adapter to "Private". Now execute the following commands:
+```batch
+winrm quickconfig -q
+winrm set winrm/config/winrs @{MaxMemoryPerShellMB="512"}
+winrm set winrm/config @{MaxTimeoutms="1800000"}
+winrm set winrm/config/service @{AllowUnencrypted="true"}
+winrm set winrm/config/service/auth @{Basic="true"}
+sc config WinRM start= auto
+```
+Now you are able to execute commands to the VM over WinRM.
 
 ## One last change
 VMware can cause issues while kernel debugging. It tends to timeout the debugger's connection after a while of inactivity. To remediate this do the following (this setting persists across all VMs):
