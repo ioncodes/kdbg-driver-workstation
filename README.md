@@ -56,7 +56,6 @@ schtasks /create /sc onstart /tr "C:\onboot.bat" /tn driveronboot /ru SYSTEM /f
 ```
 11. Create the file `C:\onboot.bat` with the following content. Again, make sure to replace `$HOSTIP` and `$HOSTPORT`:
 ```batch
-bcdedit /dbgsettings net hostip:$HOSTIP port:$HOSTPORT key:1.1.1.1
 sc start layle
 ```
 12. Remove the user's password to avoid having to enter it every time you boot the VM
