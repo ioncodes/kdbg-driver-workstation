@@ -37,7 +37,7 @@ bcdedit /set nointegritychecks on
 ```
 6. Disable UAC via registry editor:
 ```
-HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System > EnabledLUA = 0
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System > EnableLUA = 0
 ```
 7. Enable kernel debugging. Change `$HOSTIP` with your hosts IP address. Make sure the VM can ping the IP. `$HOSTPORT` should be replaced with the port that WinDbg will be listening on:
 ```batch
